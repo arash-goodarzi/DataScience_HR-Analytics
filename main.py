@@ -189,4 +189,4 @@ def mainScraping(n, searchWord):
 
 
 searchWord = 'ِData Science'
-mainScraping(3, searchWord)
+mainScraping(35, searchWord)
