@@ -6,13 +6,16 @@ def create_one_csv_from_csv_folder(abs_path_folder):
     # loop through the directory
     all_files = [os.path.join(abs_path_folder, i) for i in os.listdir(abs_path_folder)]
 
+    # remove empty files
+    [os.remove(path) for path in all_files if os.path.getsize(path) == 0]
+
+    # recreate absolute pass after removing empty files
+    all_files = [os.path.join(abs_path_folder, i) for i in os.listdir(abs_path_folder)]
+
     # create one dataframe
     df_result = pd.concat(map(pd.read_csv, all_files), ignore_index=True)
 
     df_result.to_csv('.\\data\\integrated_data' + '.csv')
 
 
-create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-01-23-10-57-48")
-df = pd.read_csv(".\data\integrated_data.csv")
-
-print(df)
+create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-01-24-08-46-19")
