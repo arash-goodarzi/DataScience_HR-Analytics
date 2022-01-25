@@ -238,6 +238,6 @@ def selenium_scraping(from_page_, to_page_, search_word_):
 
 
 search_word = 'ِData Science'
-from_page = 19
+from_page = 0
 to_page = 50
 selenium_scraping(from_page, to_page, search_word)
