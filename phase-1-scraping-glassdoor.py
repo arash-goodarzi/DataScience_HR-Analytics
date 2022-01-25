@@ -1,6 +1,7 @@
 import datetime
 import os
 
+import numpy as np
 import pandas as pd
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
@@ -12,11 +13,12 @@ PATH = "C:\Program Files (x86)\chromedriver.exe"
 
 
 # URLSearchParams
-def page_glassdoor_scraping_selenium(url):
+def page_glassdoor_scraping_selenium(url, indx):
     driver = webdriver.Chrome(service=Service(PATH), options=webdriver.ChromeOptions())
     result = []
 
     driver.maximize_window()
+
     driver.get(url)
 
     try:
@@ -27,9 +29,8 @@ def page_glassdoor_scraping_selenium(url):
     elements = driver.find_elements(By.XPATH, '//li[@data-id]')
 
     # Header table for debugging
-    print('*'*15, " Start the process ", '*'*15)
-    print('|company_name|rate|city|state|job_title|salary|salary_estimate|salary_avg|company_size|company_type'
-          '|company_sector|company_founded|company_industry|descriptions_txt|descriptions_txt|job_age|pros_txt|cons_txt|')
+    print(f'{"*" * 15}   Start process of page {indx + 1}  {">" * 15}')
+
     for index, element in enumerate(elements):
         driver.implicitly_wait(3)
 
@@ -45,7 +46,15 @@ def page_glassdoor_scraping_selenium(url):
         except NoSuchElementException:
             pass
         finally:
-            driver.implicitly_wait(8)
+            driver.implicitly_wait(15)
+
+        try:
+            button_show_me = driver.find_element(By.XPATH, '//*[@id="JobDescriptionContainer"]/div[2]')
+            driver.execute_script("arguments[0].click();", button_show_me)
+        except NoSuchElementException:
+            pass
+        finally:
+            driver.implicitly_wait(13)
 
         try:
             # Take elements
@@ -54,127 +63,132 @@ def page_glassdoor_scraping_selenium(url):
                                                     '1]/div[1]').text
             name_and_rate = company_name_rate.partition('\n')
             company_name = name_and_rate[0].strip()
+            company_name = np.nan if len(str(company_name)) == 0 else company_name
 
-            remote_work = False
+            remote_work = 0
         except NoSuchElementException:
-            company_name = ""
+            company_name = np.nan
 
         try:
             rate = driver.find_element(By.XPATH, '//*[@id="JDCol"]/div/article/div/div[1]/div/div/div[1]/div[3]/div['
                                                  '1]/div[1]/span').text
+            rate = np.nan if len(str(rate)) == 0 else rate
         except NoSuchElementException:
-            rate = -1
+            rate = np.nan
 
         try:
             company_size = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[1]/span[2]').text
+            company_size = np.nan if len(str(company_size)) == 0 else company_size
         except NoSuchElementException:
-            company_size = -1
+            company_size = np.nan
 
         try:
             company_type = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[3]/span[2]').text
+            company_type = np.nan if len(str(company_type)) == 0 else company_type
         except NoSuchElementException:
-            company_type = ""
+            company_type = np.nan
 
         try:
             company_sector = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[5]/span[2]').text
+            company_sector = np.nan if len(str(company_sector)) == 0 else company_sector
         except NoSuchElementException:
-            company_sector = ""
+            company_sector = np.nan
 
         try:
             company_founded = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[2]/span[2]').text
+            company_founded = np.nan if len(str(company_founded)) == 0 else company_founded
         except NoSuchElementException:
-            company_founded = ""
+            company_founded = np.nan
 
         try:
             company_industry = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[4]/span[2]').text
+            company_industry = np.nan if len(str(company_industry)) == 0 else company_industry
         except NoSuchElementException:
-            company_industry = ""
+            company_industry = np.nan
 
         try:
             location = driver.find_element(By.XPATH,
                                            '//*[@id="JDCol"]/div/article/div/div[1]/div/div/div[1]/div[3]/div[1]/div[3]').text
             location = location.split(", ")
         except NoSuchElementException:
-            location = ""
+            location = np.nan
 
         try:
-            print(location[0])
             city = location[0]
             if city == 'Remote':
-                remote_work = True
-                city = ""
+                remote_work = 1
+                city = np.nan
+            city = np.nan if len(str(city)) == 0 else city
         except IndexError:
-            city = ""
+            city = np.nan
 
         try:
             state = location[1]
+            state = np.nan if len(str(state)) == 0 else state
         except IndexError:
-            state = ""
+            state = np.nan
 
         try:
             job_title = driver.find_element(By.XPATH,
                                             '//*[@id="JDCol"]/div/article/div/div[1]/div/div/div[1]/div[3]/div[1]/div[2]').text
+            job_title = np.nan if len(str(job_title)) == 0 else job_title
         except NoSuchElementException:
-            job_title = ""
+            job_title = np.nan
 
         try:
             salary = driver.find_element(By.XPATH, '//*[@id="JDCol"]//span[@data-test="detailSalary"]').text
+            salary = np.nan if len(str(salary)) == 0 else salary
         except NoSuchElementException:
-            salary = ""
+            salary = np.nan
 
         try:
             salary_estimate = driver.find_element(By.XPATH,
                                                   '//*[@id="JDCol"]//span[@data-test="detailSalary"]/span').text
+            salary_estimate = np.nan if len(str(salary_estimate)) == 0 else salary_estimate
         except NoSuchElementException:
-            salary_estimate = ""
+            salary_estimate = np.nan
 
         try:
             salary_avg = driver.find_element(By.XPATH, '//span[text() = "yr"]/parent::*').text
+            salary_avg = np.nan if len(salary_avg) == 0 else salary_avg
         except NoSuchElementException:
-            salary_avg = -1
+            salary_avg = np.nan
 
         try:
             pros = driver.find_elements(By.XPATH, '//*[@id="Reviews"]/div/div/div[1]/p')
-            pros_txt = [pro.text for pro in pros]
+            pros_txt = [pro.text for pro in pros if len(pro.text) != 0]
         except NoSuchElementException:
-            pros = -1
+            pros_txt = np.nan
 
         try:
             cons = driver.find_elements(By.XPATH, '//*[@id="Reviews"]/div/div/div[2]/p')
-            cons_txt = [con.text for con in cons]
+            cons_txt = [con.text for con in cons if len(con.text) != 0]
         except NoSuchElementException:
-            cons = ""
+            cons_txt = np.nan
 
         try:
-            descriptions_txt = driver.find_elements(By.XPATH, '//div[@class="jobDescriptionContent desc"]//p')
-            descriptions_txt = [desc.text for desc in descriptions_txt]
+            driver.implicitly_wait(10)
+            descriptions_txt = driver.find_elements(By.XPATH,
+                                                    '//div[@class="jobDescriptionContent desc"]/descendant-or-self::p')
+            descriptions_txt = [desc.text for desc in descriptions_txt if len(desc.text) != 0]
         except NoSuchElementException:
-            descriptions_txt = ""
+            descriptions_txt = np.nan
 
         try:
-            descriptions_list = driver.find_elements(By.XPATH, '//div[@class="jobDescriptionContent desc"]//li')
-            descriptions_list = [con.text for con in descriptions_list]
+            descriptions_list_ = driver.find_elements(By.XPATH, '//div[@id="JobDescriptionContainer"]//ul/li')
+            descriptions_list = [con.text for con in descriptions_list_ if len(con.text) != 0]
         except NoSuchElementException:
-            descriptions_list = ""
+            descriptions_list = np.nan
 
         try:
             job_age = job_age_list[index]
         except NoSuchElementException:
-            job_age = -1
-
-        #  pre-Cleaning Data
-        salary = salary.partition("(")[0].strip()
-        salary = salary[salary.find('$'):]
-        salary_estimate = salary_estimate.replace('(', '')
-        salary_estimate = salary_estimate.replace('est', '')
-        salary_estimate = salary_estimate.replace('.', '')
-        salary_estimate = salary_estimate.replace(':', '')
-        salary_estimate = salary_estimate.replace(')', '').strip()
+            job_age = np.nan
 
         # Debugging Propose
 
         print(
-            f'|{company_name}|{rate}|{city}|{state}|{job_title}|{salary}|{salary_estimate}|{salary_avg}|{company_size}|{company_type}|{company_sector}|{company_founded}|{company_industry}|{descriptions_txt}|{descriptions_list}|{job_age}|{pros_txt}|{cons_txt}|')
+            f'{index}|{company_name}|{rate}|{city}|{state}|{job_title}|{salary}|{salary_estimate}|{salary_avg}|{company_size}|{company_type}|{company_sector}|{company_founded}|{company_industry}|{descriptions_txt}|{descriptions_list}|{job_age}|{pros_txt}|{cons_txt}|')
 
         # Add result to list
         result.append({
@@ -198,33 +212,32 @@ def page_glassdoor_scraping_selenium(url):
             "pros": pros_txt,
             "cons": cons_txt
         })
-
+    print(f'{"*" * 15}   End process of page {indx + 1}  {"<" * 15}')
     return pd.DataFrame(result)
 
 
 def grassdoor_url_generator(n, search_w):
-    return 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword=%22'+ search_w +'%22&locT=C&locId=1147401,%20CA&jobType=all&fromAge=-1&minSalary=0&includeNoSalaryJobs=true&radius=100&cityId=-1&minRating=0.0&industryId=-1&sgocId=-1&seniorityType=all&companyId=-1&employerSizes=0&applicationType=0&remoteWorkType=0&' + 'p=' + str(n)
+    return 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword=%22' + search_w + '%22&locT=C&locId=1147401,%20CA&jobType=all&fromAge=-1&minSalary=0&includeNoSalaryJobs=true&radius=100&cityId=-1&minRating=0.0&industryId=-1&sgocId=-1&seniorityType=all&companyId=-1&employerSizes=0&applicationType=0&remoteWorkType=0&' + 'p=' + str(
+        n)
 
 
 def selenium_scraping(from_page_, to_page_, search_word_):
-
     path = os.getcwd()
     parent_path = os.path.abspath(os.path.join(path, os.pardir))
-    path_folder = os.path.join(parent_path, "glassdoor-data-data-science", datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
+    path_folder = os.path.join(parent_path, "glassdoor-data-data-science",
+                               datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
     os.makedirs(path_folder)
 
     urls = [grassdoor_url_generator(i, search_word_) for i in range(from_page_, to_page_)]
     for inx, url in enumerate(urls):
-        df = page_glassdoor_scraping_selenium(url)
+        df = page_glassdoor_scraping_selenium(url, inx)
         destination = os.path.join(path_folder, str(inx))
-        df.to_csv(destination+'.csv')
+        df.to_csv(destination + '.csv', index=False)
 
-    print('*'*15, " End the process ", '*'*15)
+    print('*' * 15, " End the process of saving", '*' * 15)
 
 
 search_word = 'ِData Science'
-from_page = 0
-to_page = 30
+from_page = 19
+to_page = 50
 selenium_scraping(from_page, to_page, search_word)
-
-

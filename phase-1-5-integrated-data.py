@@ -12,7 +12,7 @@ def create_one_csv_from_csv_folder(abs_path_folder):
     df_result.to_csv('.\\data\\integrated_data' + '.csv')
 
 
-create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-01-19-10-55-23")
+create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-01-23-10-57-48")
 df = pd.read_csv(".\data\integrated_data.csv")
 
 print(df)
