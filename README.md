@@ -1,8 +1,10 @@
-# DataScience_HR Analytics
+# <span style="color:#DAB11D">DataScience_HR Analytics</span>
 
-## Phase 0 - Problem                               =>      Brainstorming         =>         Glassdoor
-## Phase 1 - Data Collection                   =>      scraping                   =>         Selenium
-## Phase 2 - Data Cleaning                     =>      Pandas   
-## Phase 3 - Exploratory Data analysis => 
-## Phase 4 - Model Building
-## Phase 5 - Dashboard
+### ![#F0ED00](https://via.placeholder.com/15/fDAB11D/000000?text=+) Phase 0 <span style="color:#E94B3CFF">--</span> Problem   <span style="color:#E94B3CFF">=></span>   Brainstorming   <span style="color:#E94B3CFF">=></span>   Glassdoor
+### ![#F0ED00](https://via.placeholder.com/15/fDAB11D/000000?text=+) Phase 1 <span style="color:#E94B3CFF">--</span> Data Collection    <span style="color:#E94B3CFF">=></span>  scraping  <span style="color:#E94B3CFF">=></span>   Selenium</span>
+### ![#F0ED00](https://via.placeholder.com/15/fDAB11D/000000?text=+) Phase 2 <span style="color:#E94B3CFF">--</span> Data Cleaning        <span style="color:#E94B3CFF">=></span>      Pandas   
+### ![#F0ED00](https://via.placeholder.com/15/fDAB11D/000000?text=+) Phase 3 <span style="color:#E94B3CFF">--</span> Exploratory Data analysis <span style="color:#E94B3CFF">=></span>
+### ![#F0ED00](https://via.placeholder.com/15/fDAB11D/000000?text=+) Phase 4 <span style="color:#E94B3CFF">--</span> Model Building</span>
+### ![#F0ED00](https://via.placeholder.com/15/fDAB11D/000000?text=+) Phase 5 <span style="color:#E94B3CFF">--</span> Dashboard</span>
+
+<span style="color:#DAB11D">Developer: *Arash Goodarzi*  </span>

@@ -13,7 +13,7 @@ PATH = "C:\Program Files (x86)\chromedriver.exe"
 
 
 # URLSearchParams
-def page_glassdoor_scraping_selenium(url, indx):
+def page_glassdoor_scraping_selenium(url, indx, job_age_d):
     driver = webdriver.Chrome(service=Service(PATH), options=webdriver.ChromeOptions())
     result = []
 
@@ -32,7 +32,7 @@ def page_glassdoor_scraping_selenium(url, indx):
     print(f'{"*" * 15}   Start process of page {indx + 1}  {">" * 15}')
 
     for index, element in enumerate(elements):
-        driver.implicitly_wait(3)
+        driver.implicitly_wait(5)
 
         try:
             element.click()
@@ -46,7 +46,7 @@ def page_glassdoor_scraping_selenium(url, indx):
         except NoSuchElementException:
             pass
         finally:
-            driver.implicitly_wait(15)
+            driver.implicitly_wait(17)
 
         try:
             button_show_me = driver.find_element(By.XPATH, '//*[@id="JobDescriptionContainer"]/div[2]')
@@ -185,6 +185,27 @@ def page_glassdoor_scraping_selenium(url, indx):
         except NoSuchElementException:
             job_age = np.nan
 
+        if job_age_d == 1:
+            job_age = datetime.datetime.now().strftime('%Y-%m-%d')
+        elif job_age_d == 2:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=2)).strftime('%Y-%m-%d')
+        elif job_age_d == 3:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=3)).strftime('%Y-%m-%d')
+        elif job_age_d == 4:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=4)).strftime('%Y-%m-%d')
+        elif job_age_d == 5:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=5)).strftime('%Y-%m-%d')
+        elif job_age_d == 6:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=6)).strftime('%Y-%m-%d')
+        elif job_age_d == 7:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')
+        elif job_age_d == 14:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=14)).strftime('%Y-%m-%d')
+        elif job_age_d == 30:
+            job_age = (datetime.datetime.now() - datetime.timedelta(days=30)).strftime('%Y-%m-%d')
+
+
+
         # Debugging Propose
 
         print(
@@ -216,21 +237,22 @@ def page_glassdoor_scraping_selenium(url, indx):
     return pd.DataFrame(result)
 
 
-def grassdoor_url_generator(n, search_w):
-    return 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword=%22' + search_w + '%22&locT=C&locId=1147401,%20CA&jobType=all&fromAge=-1&minSalary=0&includeNoSalaryJobs=true&radius=100&cityId=-1&minRating=0.0&industryId=-1&sgocId=-1&seniorityType=all&companyId=-1&employerSizes=0&applicationType=0&remoteWorkType=0&' + 'p=' + str(
+def grassdoor_url_generator(n, search_w, job_age_d):
+    return 'https://www.glassdoor.com/Job/jobs.htm?sc.keyword=%22' + search_w + '%22&locT=C&locId=1147401,%20CA&jobType=all&fromAge=' + str(
+        job_age_d) + '&minSalary=0&includeNoSalaryJobs=true&radius=100&cityId=-1&minRating=0.0&industryId=-1&sgocId=-1&seniorityType=all&companyId=-1&employerSizes=0&applicationType=0&remoteWorkType=0&' + 'p=' + str(
         n)
 
 
-def selenium_scraping(from_page_, to_page_, search_word_):
+def selenium_scraping(from_page_, to_page_, search_word_, job_age_):
     path = os.getcwd()
     parent_path = os.path.abspath(os.path.join(path, os.pardir))
     path_folder = os.path.join(parent_path, "glassdoor-data-data-science",
                                datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
     os.makedirs(path_folder)
 
-    urls = [grassdoor_url_generator(i, search_word_) for i in range(from_page_, to_page_)]
+    urls = [grassdoor_url_generator(i, search_word_, job_age_) for i in range(from_page_, to_page_)]
     for inx, url in enumerate(urls):
-        df = page_glassdoor_scraping_selenium(url, inx)
+        df = page_glassdoor_scraping_selenium(url, inx, job_age_)
         destination = os.path.join(path_folder, str(inx))
         df.to_csv(destination + '.csv', index=False)
 
@@ -239,5 +261,11 @@ def selenium_scraping(from_page_, to_page_, search_word_):
 
 search_word = 'ِData Science'
 from_page = 0
-to_page = 50
-selenium_scraping(from_page, to_page, search_word)
+to_page = 1
+job_age = 1
+# job_age = 1          => last day
+# job_age = 3          => last 3 days
+# job_age = -1         => all times
+
+
+selenium_scraping(from_page, to_page, search_word, job_age)
