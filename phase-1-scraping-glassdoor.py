@@ -37,7 +37,6 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
         try:
             element.click()
         except Exception as ex:
-            print(ex)
             continue
 
         try:
@@ -46,7 +45,7 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
         except NoSuchElementException:
             pass
         finally:
-            driver.implicitly_wait(17)
+            driver.implicitly_wait(3)
 
         try:
             button_show_me = driver.find_element(By.XPATH, '//*[@id="JobDescriptionContainer"]/div[2]')
@@ -54,7 +53,7 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
         except NoSuchElementException:
             pass
         finally:
-            driver.implicitly_wait(13)
+            driver.implicitly_wait(15)
 
         try:
             # Take elements
@@ -70,8 +69,9 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
             company_name = np.nan
 
         try:
-            rate = driver.find_element(By.XPATH, '//*[@id="JDCol"]/div/article/div/div[1]/div/div/div[1]/div[3]/div['
-                                                 '1]/div[1]/span').text
+            rate = driver.find_element(By.XPATH,
+                                       '//*[@id="JDCol"]/div/article/div/div[1]/div/div/div[1]/div[3]/div['
+                                       '1]/div[1]/span').text
             rate = np.nan if len(str(rate)) == 0 else rate
         except NoSuchElementException:
             rate = np.nan
@@ -95,14 +95,21 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
             company_sector = np.nan
 
         try:
-            company_founded = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[2]/span[2]').text
+            company_founded = driver.find_element(By.XPATH,
+                                                  '//*[@id="EmpBasicInfo"]/div[1]/div/div[2]/span[2]').text
             company_founded = np.nan if len(str(company_founded)) == 0 else company_founded
         except NoSuchElementException:
             company_founded = np.nan
 
         try:
-            company_industry = driver.find_element(By.XPATH, '//*[@id="EmpBasicInfo"]/div[1]/div/div[4]/span[2]').text
+            company_industry = driver.find_element(By.XPATH,
+                                                   '//*[@id="EmpBasicInfo"]/div[1]/div/div[4]/span[2]').text
             company_industry = np.nan if len(str(company_industry)) == 0 else company_industry
+        except NoSuchElementException:
+            company_industry = np.nan
+
+        try:
+            job_id = driver.find_element(By.XPATH, "//button[@data-job-id]").get_attribute('data-job-id')
         except NoSuchElementException:
             company_industry = np.nan
 
@@ -204,12 +211,10 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
         elif job_age_d == 30:
             job_age = (datetime.datetime.now() - datetime.timedelta(days=30)).strftime('%Y-%m-%d')
 
-
-
         # Debugging Propose
 
         print(
-            f'{index}|{company_name}|{rate}|{city}|{state}|{job_title}|{salary}|{salary_estimate}|{salary_avg}|{company_size}|{company_type}|{company_sector}|{company_founded}|{company_industry}|{descriptions_txt}|{descriptions_list}|{job_age}|{pros_txt}|{cons_txt}|')
+            f'{index}|{company_name}|{rate}|{city}|{state}|{job_id}|{job_title}|{salary}|{salary_estimate}|{salary_avg}|{company_size}|{company_type}|{company_sector}|{company_founded}|{company_industry}|{descriptions_txt}|{descriptions_list}|{job_age}|{pros_txt}|{cons_txt}|')
 
         # Add result to list
         result.append({
@@ -217,6 +222,7 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
             "rate": rate,
             "city": city,
             "state": state,
+            "job_id": job_id,
             "remote_work": remote_work,
             "job_title": job_title,
             "salary": salary,
@@ -244,13 +250,17 @@ def grassdoor_url_generator(n, search_w, job_age_d):
 
 
 def selenium_scraping(from_page_, to_page_, search_word_, job_age_):
+    # create folder for destination data
     path = os.getcwd()
     parent_path = os.path.abspath(os.path.join(path, os.pardir))
     path_folder = os.path.join(parent_path, "glassdoor-data-data-science",
                                datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
     os.makedirs(path_folder)
 
+    # creating of urls
     urls = [grassdoor_url_generator(i, search_word_, job_age_) for i in range(from_page_, to_page_)]
+
+    # get data from each url
     for inx, url in enumerate(urls):
         df = page_glassdoor_scraping_selenium(url, inx, job_age_)
         destination = os.path.join(path_folder, str(inx))
@@ -259,13 +269,15 @@ def selenium_scraping(from_page_, to_page_, search_word_, job_age_):
     print('*' * 15, " End the process of saving", '*' * 15)
 
 
+# Input data #################
 search_word = 'ِData Science'
 from_page = 0
-to_page = 1
-job_age = 1
-# job_age = 1          => last day
-# job_age = 3          => last 3 days
-# job_age = -1         => all times
+to_page = 5
+job_age = 1  # 1=> last day       3=> last 3 days      -1=> all times
+##############################
 
+# adjust inputs
+from_page = 1 if from_page < 1 else from_page
+to_page = 30 if to_page > 30 else to_page
 
 selenium_scraping(from_page, to_page, search_word, job_age)
