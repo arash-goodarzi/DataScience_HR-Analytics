@@ -271,8 +271,8 @@ def selenium_scraping(from_page_, to_page_, search_word_, job_age_):
 
 # Input data #################
 search_word = 'ِData Science'
-from_page = 0
-to_page = 5
+from_page = 15
+to_page = 30
 job_age = 1  # 1=> last day       3=> last 3 days      -1=> all times
 ##############################
 
