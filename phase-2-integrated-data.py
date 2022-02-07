@@ -1,3 +1,13 @@
+"""
+Created on Tue Jan 23 11:42:16 2022
+
+@author: arash
+
+"""
+
+
+
+
 import pandas as pd
 import os
 
@@ -32,5 +42,5 @@ def append_data_achieve(new_file, source_file):
 
 ##### List of operations
 
-# create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-01-31-12-42-55")
+# create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-02-02-17-42-18")
 # append_data_achieve(r'.\data\bucket.csv', r'.\data\data.csv')

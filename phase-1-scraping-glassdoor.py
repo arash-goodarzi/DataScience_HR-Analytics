@@ -1,3 +1,12 @@
+"""
+Created on Tue Jan 15 18:06:32 2022
+
+@author: arash
+
+"""
+
+
+
 import datetime
 import os
 
@@ -128,11 +137,13 @@ def page_glassdoor_scraping_selenium(url, indx, job_age_d):
             city = np.nan if len(str(city)) == 0 else city
         except IndexError:
             city = np.nan
+        except :
+            city = np.nan
 
         try:
             state = location[1]
             state = np.nan if len(str(state)) == 0 else state
-        except IndexError:
+        except :
             state = np.nan
 
         try:
@@ -271,8 +282,8 @@ def selenium_scraping(from_page_, to_page_, search_word_, job_age_):
 
 # Input data #################
 search_word = 'ِData Science'
-from_page = 15
-to_page = 30
+from_page = 5
+to_page = 10
 job_age = 1  # 1=> last day       3=> last 3 days      -1=> all times
 ##############################
 

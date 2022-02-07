@@ -1,157 +1,44 @@
+# -*- coding: utf-8 -*-
 """
-Created on Tue Jan 25 10:10:36 2022
+Created on Thu Jan 17 08:10:19 2022
 
-@author: arash goodarzi
-
-Step 1: Remove duplicate or irrelevant observations. Remove unwanted observations from your dataset, including duplicate observations or irrelevant observations. ...
-Step 2: Fix structural errors. ...
-Step 3: Filter unwanted outliers. ...
-Step 4: Handle missing data. ...
-
+@author: arash
 """
 
 import numpy as np
 import pandas as pd
 
-############################
-# constants
-title_enum = ["Data Science", "Data Software Engineer", "Data Software Engineer", "Data Scientist",
-              "Data Support Analyst", "Machine Learning Enginee", "Data Analyst", "Data Visualization Analyst",
-              "Data Specialist", "Computer Science", "Data Modeler", "Data Engineer", "Data Architect", "Statistician", "Business Intelligence Analyst", "Marketing Scientist","Business Analyst", "Quantitative Analyst", "Machine Learning Engineer"]
-position_enum = ["Manager", "Senior", "Co-op", "Head of Enterprise", "Lead", "Fellowship", "Consultant"]
-
-company_size_enum = ["1 to 50 Employees", "51 to 200 Employees", "201 to 500 Employees", "501 to 1000 Employees",
-                     "1001 to 5000 Employees", "5001 to 10000 Employees", "10000+ Employees"]
-
-company_size_dict = {"1 to 50 Employees": 25, "51 to 200 Employees": 100, "201 to 500 Employees": 350,
-                     "501 to 1000 Employees": 750, "1001 to 5000 Employees": 3000, "5001 to 10000 Employees": 7500,
-                     "10000+ Employees": 10000}
-
-
-############################
-# General function
-
-def find_item_enum_txt(enum, txt):
-    """return (bool,item)
-    it return tuple that shows item is found or not
-    and shows what is it
-    """
-
-    enum = [i.lower() for i in enum]
-    txt = txt.lower()
-
-    for item in enum:
-        if item in txt:
-            return (True, item)
-    return (False, np.nan)
-
-
-def find_items_enum_txt(enum, txt):
-    """return []
-    it returns array of found elements
-    """
-    res = []
-
-    enum = [i.lower() for i in enum]
-    txt = txt.lower()
-
-    for item in enum:
-        if item in txt:
-            res.append(item)
-
-    return res
-
-
-############################
-# main function
-
-def clean_data_extract_fields(path_in, path_out):
-    df = pd.read_csv(path_in)
-
-    df.dropna(subset=["salary", "job_id"], inplace=True)
-    df = df.drop_duplicates(subset=['job_id'], keep='first')
-
-    df = df[[c for c in df.columns if c.lower()[:7] != 'unnamed']]
-
-    df["title"] = df["job_title"].apply(lambda x: find_item_enum_txt(title_enum, x)[1])
-    df["position"] = df["job_title"].apply(lambda x: find_item_enum_txt(position_enum, x)[1]).replace(to_replace=np.nan,
-                                                                                                      value="developer")
-
-    df["per_hour"] = df["salary"].apply(lambda x: 1 if 'per hour' in x.lower() else 0)
-    df["salary"] = df["salary"].apply(
-        lambda x: x.replace("(Glassdoor est.)", "").replace("Employer Provided Salary:", "").replace("$", "").replace(
-            "K", "").replace("Per Hour", ""))
-
-    df["salary"] = df["salary"].map(lambda x: list(map(int, filter(None, x.split('-')))))
-
-    df[["min", "max"]] = pd.DataFrame(df.salary.tolist(), index=df.index)
-
-    df["max"] = np.where(df["max"].isnull(), df["min"], df["max"])
-
-    df["min"] = np.where(df["per_hour"] == 1, df["min"] * 1.8, df["min"])
-    df["max"] = np.where(df["per_hour"] == 1, df["max"] * 1.8, df["max"])
-    df["avg_salary"] = (df["min"] + df["max"]) / 2
-
-    df.drop(['salary', 'min', 'max', 'salary_avg'], axis=1, inplace=True)
-
-    df['desc_txt'] = df['descriptions_txt'].apply(
-        lambda x: x.replace("[", "").replace("]", "").replace(",", "").replace("'", ""))
-    df['desc_list'] = df['descriptions_list'].apply(
-        lambda x: x.replace("[", "").replace("]", "").replace(",", "").replace("'", ""))
-    df["desc"] = df['desc_txt'] + df['desc_list']
-
-    # replace null value with empty string
-    df['desc'] = df['desc'].fillna("")
-
-    df.drop(['desc_txt', 'desc_list', 'descriptions_txt', 'descriptions_list'], axis=1, inplace=True)
-
-    df['pros'] = df['pros'].apply(
-        lambda x: x.replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace("\"", ""))
-    df['cons'] = df['cons'].apply(
-        lambda x: x.replace("[", "").replace("]", "").replace(",", "").replace("'", "").replace("\"", ""))
-
-    df['salary_estimate'] = df['salary_estimate'].apply(
-        lambda x: x.replace('.', '').replace('(', '').replace(')', '').replace(':', ''))
-
-    df["company_size_number"] = df["company_size"].replace('Unknown', np.nan).replace(np.nan,
-                                                                                      '1 to 50 Employees').astype(
-        str).apply(lambda x: company_size_dict[x])
-
-    # majority of companies who is not mention the size of their companies they are in small size range.
-    #			1 to 50 Employees				small				25
-    #			51 to 200 Employees				medium-sized		100
-    #			201 to 500 Employees			medium-sized		350
-    #			501 to 1000 Employees			large 				750
-    #			1001 to 5000 Employees			large 				3000
-    #			5001 to 10000 Employees			large				7500
-    #			10000+ Employees				large 				10000
-
-    df.to_csv(path_out, index=False)
 
 
 def clean_data_enrich_data_description(path_in, path_out):
     df = pd.read_csv(path_in)
 
     # =============================================================================
-    #  rerange columns
+    #  rearrange columns
     #
-    # ['company_name', 'city', 'state', 'rate',
-    #         'title', 'position', 'avg_salary','job_age',
-    #          'company_size', 'company_type', 'company_sector','company_size_number', 'company_founded', 'company_industry',
-    #          'pros', 'cons','desc',
-    #          'per_hour', 'remote_work', 'salary_estimate']
+    # df = df[['company_name', 'city', 'state', 'rate',
+    #          'title', 'position', 'avg_salary', 'job_age',
+    #          'company_type', 'company_sector', 'avg_employees', 'company_founded',
+    #          'company_industry',
+    #          'pros', 'cons', 'desc',
+    #          'per_hour', 'remote_work', 'salary_estimate']]
     # =============================================================================
 
-    df = df[['company_name', 'city', 'state', 'rate',
-             'title', 'position', 'avg_salary', 'job_age',
-             'company_size', 'company_type', 'company_sector', 'company_size_number', 'company_founded',
+    df = df[['rate',
+             'title', 'position', 'avg_salary',
+             'company_type', 'company_sector', 'avg_employees',
              'company_industry',
-             'pros', 'cons', 'desc',
+             'desc',
              'per_hour', 'remote_work', 'salary_estimate']]
+
+
+
+    # step 1 extract from desc field
+
 
     # fill null desc column to empty string
     df['desc'] = df['desc'].replace(np.nan, '')
-    
+
     #  apache
     df['apache_airflow'] = df['desc'].apply(lambda x: 'airflow' in x.lower())
     df['apache_kafka'] = df['desc'].apply(lambda x: 'kafka' in x.lower())
@@ -297,7 +184,7 @@ def clean_data_enrich_data_description(path_in, path_out):
 
     df['skills'] = df.iloc[:, -113:].sum(axis=1)
 
-# =============================================================================
+    # =============================================================================
     # list of variables that will be monitored
     # "sas",
     # "apache_hadoop",
@@ -436,15 +323,43 @@ def clean_data_enrich_data_description(path_in, path_out):
     #
     #
     # =============================================================================
+    
+    df.drop(['desc'], axis=1, inplace=True)
+    # step 2 drop desc field and get dummies
+    # rate
+    # title
+    # position
+    # avg_salary
+    # company_type
+    # company_sector
+    # avg_employees
+    # company_industry
+    # per_hour
+    # remote_work
+    # salary_estimate
+    df_dum = pd.get_dummies(df)
 
-    df.to_csv(path_out, index=False)
+    df_dum.to_csv(path_out, index=False)
 
+
+# def clean_data_enrich_data_others(path_in, path_out):
+#     # rate
+#     # avg_employees
+#     # remote_work
+#     # salary_estimate
+#     # company_type
+#     # company_sector
+#     # company_industry
+#     # title
+#     # position
+#     # per_hour
+#     # avg_salary
+#     pass
 
 ##### List of operations
+clean_data_enrich_data_description(r'D:\project\DataScience_HR Analytics\data\data_clean.csv',
+                                   r'D:\project\DataScience_HR Analytics\data\data_clean_enrich.csv')
 
-# clean_data_extract_fields(r'D:\project\DataScience_HR Analytics\data\data.csv',
-#                                        r'D:\project\DataScience_HR Analytics\data\data_clean.csv')
 
-# clean_data_enrich_data_description(r'D:\project\DataScience_HR Analytics\data\data_clean.csv',
-#                                    r'D:\project\DataScience_HR Analytics\data\data_clean_enrich.csv')
-#
+# clean_data_enrich_data_others(r'D:\project\DataScience_HR Analytics\data\data_clean_enrich.csv',r'D:\project\DataScience_HR Analytics\data\data_clean_enrich_dummies.csv')
+
