@@ -2,7 +2,7 @@
 """
 Created on Sun Feb  6 18:34:10 2022
 
-@author: adakl
+@author: arash
 
 # estimator
 LinearRegression
@@ -24,8 +24,8 @@ from sklearn.model_selection import train_test_split
 import statsmodels.api as sm
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.model_selection import cross_val_score
-
-
+from sklearn.ensemble import  RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
 
 df = pd.read_csv(r'D:\project\DataScience_HR Analytics\data\data_clean_enrich.csv')
 df['rate'] = df['rate'].replace(np.nan, 0)
@@ -76,13 +76,13 @@ err=tuple(zip(alpha,error))
 df_err = pd.DataFrame(err,columns=['alpha','error'])
 df_err[df_err.error == max(df_err.error)]
 
-from sklearn.ensemble import  RandomForestRegressor
+
 rf = RandomForestRegressor()
 
 np.mean(cross_val_score(rf,X_train,y_train,scoring='neg_mean_absolute_error',cv=3))
 
 
-from sklearn.model_selection import GridSearchCV
+
 parameters= {'n_estimators':range(10,300,10),'criterion':('mse','mae'),'max_features':('auto','sqrt','log2')}
 
 gs = GridSearchCV(rf,parameters,scoring='neg_mean_absolute_error',cv=3)
@@ -97,12 +97,23 @@ tpred_lml = lm_l.predict(X_test)
 tpred_rf = gs.best_estimator_.predict(X_test)
 
 from sklearn.metrics import mean_absolute_error
-mean_absolute_error(y_test,tpred_lm)
-mean_absolute_error(y_test,tpred_lml)
-mean_absolute_error(y_test,tpred_rf)
+mean_absolute_error(y_test, tpred_lm)
+mean_absolute_error(y_test, tpred_lml)
+mean_absolute_error(y_test, tpred_rf)
 
-mean_absolute_error(y_test,(tpred_lm + tpred_rf)/2)
+mean_absolute_error(y_test, (tpred_lm + tpred_rf)/2)
 
 
 
+import pickle
+pickl = {'model':gs.best_estimator_}
+pickle.dump( pickl, open( './/flaskAPI//models//model_file' + ".p", "wb" ) )
+
+file_name = 'model_file.p'
+
+with open(file_name,'rb') as pickled:
+    data = pickle.load(pickled)
+    model = data['model']
+    
+model.predict(np.array(list(X_test.iloc[1, :])).reshape(1,-1))[0]
 
