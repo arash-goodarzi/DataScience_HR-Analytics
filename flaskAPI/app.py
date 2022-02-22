@@ -24,9 +24,11 @@ def predict():
     request_json = request.get_json()
     x = request_json['input']
     #print(x)
-    x_in = np.array(x).reshape(1,-1)
+    x_in = np.array(x).reshape(1, -1)
     # load model
     model = load_models()
     prediction = model.predict(x_in)[0]
+    prediction = format(prediction, ".3f")
     response = json.dumps({'response': prediction})
     return response, 200
+

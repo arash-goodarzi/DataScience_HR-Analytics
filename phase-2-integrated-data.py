@@ -42,5 +42,5 @@ def append_data_achieve(new_file, source_file):
 
 ##### List of operations
 
-# create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-02-13-09-37-08")
+# create_one_csv_from_csv_folder(r"D:\project\glassdoor-data-data-science\2022-02-18-16-25-55")
 # append_data_achieve(r'.\data\bucket.csv', r'.\data\data.csv')
